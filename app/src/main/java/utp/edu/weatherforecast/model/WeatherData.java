@@ -11,54 +11,219 @@ import com.google.gson.annotations.SerializedName;
 import java.lang.reflect.Type;
 import java.util.List;
 
-//https://openweathermap.org/current
+//https://openweathermap.org/api/one-call-api
 @Data
 public class WeatherData {
 
-    @SerializedName("coord")
-    private Coord coord;
+    @SerializedName("lon")
+    private Double lon;
 
-    @SerializedName("weather")
-    private List<Weather> weather;
-
-    @SerializedName("base")
-    private String base;
-
-    @SerializedName("main")
-    private Main main;
-
-    @SerializedName("visibility")
-    private Integer visibility;
-
-    @SerializedName("wind")
-    private Wind wind;
-
-    @SerializedName("clouds")
-    @JsonAdapter(CloudsDeserializer.class)
-    private Integer cloudsAll;
-
-    @SerializedName("dt")
-    private Integer dt;
-
-    @SerializedName("sys")
-    private Sys sys;
+    @SerializedName("lat")
+    private Double lat;
 
     @SerializedName("timezone")
-    private Integer timezone;
+    private String timezone;
 
-    @SerializedName("id")
-    private Integer cityId;
+    @SerializedName("timezone_offset")
+    private Integer timezoneOffset;
 
-    @SerializedName("name")
-    private String cityName;
+    @SerializedName("current")
+    private Current current;
+
+    @SerializedName("hourly")
+    private List<Hourly> hourly;
+
+    @SerializedName("daily")
+    private List<Daily> daily;
 
     @Data
-    public static class Coord {
-        @SerializedName("lon")
-        private Double lon;
+    public static class Current {
 
-        @SerializedName("lat")
-        private Double lat;
+        @SerializedName("dt")
+        private Double dt;
+
+        @SerializedName("sunrise")
+        private Integer sunrise;
+
+        @SerializedName("sunset")
+        private Integer sunset;
+
+        @SerializedName("temp")
+        private Double temp;
+
+        @SerializedName("feels_like")
+        private Double feelsLike;
+
+        @SerializedName("pressure")
+        private Integer pressure;
+
+        @SerializedName("humidity")
+        private Integer humidity;
+
+        @SerializedName("dew_point")
+        private Double dewPoint;
+
+        @SerializedName("uvi")
+        private Double uvi;
+
+        @SerializedName("clouds")
+        private Integer clouds;
+
+        @SerializedName("visibility")
+        private Integer visibility;
+
+        @SerializedName("wind_speed")
+        private Double windSpeed;
+
+        @SerializedName("wind_deg")
+        private Integer windDeg;
+
+        @SerializedName("wind_gust")
+        private Double windGust;
+
+        @SerializedName("weather")
+        private List<Weather> weather;
+
+    }
+
+    @Data
+    public static class Hourly {
+
+        @SerializedName("dt")
+        private Double dt;
+
+        @SerializedName("temp")
+        private Double temp;
+
+        @SerializedName("feels_like")
+        private Double feelsLike;
+
+        @SerializedName("pressure")
+        private Integer pressure;
+
+        @SerializedName("humidity")
+        private Integer humidity;
+
+        @SerializedName("dew_point")
+        private Double dewPoint;
+
+        @SerializedName("uvi")
+        private Double uvi;
+
+        @SerializedName("clouds")
+        private Integer clouds;
+
+        @SerializedName("visibility")
+        private Integer visibility;
+
+        @SerializedName("wind_speed")
+        private Double windSpeed;
+
+        @SerializedName("wind_deg")
+        private Integer windDeg;
+
+        @SerializedName("wind_gust")
+        private Double windGust;
+
+        @SerializedName("weather")
+        private List<Weather> weather;
+    }
+
+    @Data
+    public static class Daily {
+
+        @SerializedName("dt")
+        private Double dt;
+
+        @SerializedName("sunrise")
+        private Integer sunrise;
+
+        @SerializedName("sunset")
+        private Integer sunset;
+
+        @SerializedName("moonrise")
+        private Integer moonRise;
+
+        @SerializedName("moonset")
+        private Integer moonSet;
+
+        @SerializedName("moon_phase")
+        private Double moonPhase;
+
+        @SerializedName("pressure")
+        private Integer pressure;
+
+        @SerializedName("humidity")
+        private Integer humidity;
+
+        @SerializedName("dew_point")
+        private Double dewPoint;
+
+        @SerializedName("wind_speed")
+        private Double windSpeed;
+
+        @SerializedName("wind_deg")
+        private Integer windDeg;
+
+        @SerializedName("wind_gust")
+        private Double windGust;
+
+        @SerializedName("clouds")
+        private Integer clouds;
+
+        @SerializedName("pop")
+        private Double pop;
+
+        @SerializedName("uvi")
+        private Double uvi;
+
+        @SerializedName("weather")
+        private List<Weather> weather;
+
+        @SerializedName("temp")
+        private Temp temp;
+
+        @SerializedName("feels_like")
+        private FeelsLike feelsLike;
+
+        @Data
+        public static class Temp {
+
+            @SerializedName("day")
+            private Double day;
+
+            @SerializedName("min")
+            private Double min;
+
+            @SerializedName("max")
+            private Double max;
+
+            @SerializedName("night")
+            private Double night;
+
+            @SerializedName("eve")
+            private Double eve;
+
+            @SerializedName("morn")
+            private Double morn;
+        }
+
+        @Data
+        public static class FeelsLike {
+
+            @SerializedName("day")
+            private Double day;
+
+            @SerializedName("night")
+            private Double night;
+
+            @SerializedName("eve")
+            private Double eve;
+
+            @SerializedName("morn")
+            private Double morn;
+        }
+
     }
 
     @Data
@@ -76,56 +241,5 @@ public class WeatherData {
         private String icon;
     }
 
-    @Data
-    public static class Main {
-        @SerializedName("temp")
-        private Double temp;
-
-        @SerializedName("feels_like")
-        private Double feelsLike;
-
-        @SerializedName("temp_min")
-        private Double tempMin;
-
-        @SerializedName("temp_max")
-        private Double tempMax;
-
-        @SerializedName("pressure")
-        private Integer pressure;
-
-        @SerializedName("humidity")
-        private Integer humidity;
-    }
-
-    @Data
-    public static class Wind {
-        @SerializedName("speed")
-        private Double speed;
-
-        @SerializedName("deg")
-        private Integer deg;
-
-        @SerializedName("gust")
-        private Double gust;
-    }
-
-    @Data
-    public static class Sys {
-        @SerializedName("country")
-        private String country;
-
-        @SerializedName("sunrise")
-        private Integer sunrise;
-
-        @SerializedName("sunset")
-        private Integer sunset;
-    }
-
-    public static class CloudsDeserializer implements JsonDeserializer<Integer> {
-        @Override
-        public Integer deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) {
-            return json.getAsJsonObject().get("all").getAsInt();
-        }
-    }
 
 }
