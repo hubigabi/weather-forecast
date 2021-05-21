@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Weather forecast</string>
+    <string name="internet_permission">Internet permission is required</string>
+    <string name="refresh_button_text">Refresh</string>
+</resources>
