@@ -2,4 +2,6 @@
     <string name="app_name">Weather forecast</string>
     <string name="internet_permission">Internet permission is required</string>
     <string name="refresh_button_text">Refresh</string>
+    <string name="location_button_text">Location</string>
+    <string name="location_permission">Location permission is required</string>
 </resources>

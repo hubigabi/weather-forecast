@@ -2,12 +2,21 @@ package utp.edu.weatherforecast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.Toast;
+
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.List;
 
@@ -23,26 +32,46 @@ import utp.edu.weatherforecast.service.WeatherClient;
 public class MainActivity extends AppCompatActivity implements EasyPermissions.PermissionCallbacks {
 
     private static final int INTERNET_REQUEST_CODE = 1;
+    private static final int LOCATION_REQUEST_CODE = 2;
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    private Button refreshButton;
+    private FusedLocationProviderClient fusedLocationClient;
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
-    ;
+    private Button refreshButton;
+    private Button locationButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         refreshButton = findViewById(R.id.refresh_button);
+        locationButton = findViewById(R.id.location_button);
         refreshButton.setOnClickListener(v -> refresh());
+        locationButton.setOnClickListener(v -> location());
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
+    @SuppressLint("MissingPermission")
+    @AfterPermissionGranted(LOCATION_REQUEST_CODE)
+    private void location() {
+        String[] perms = {Manifest.permission.ACCESS_FINE_LOCATION};
+        if (EasyPermissions.hasPermissions(this, perms)) {
+
+            fusedLocationClient.getLastLocation()
+                    .addOnSuccessListener(this, location -> {
+                        if (location != null) {
+                            System.out.println(location);
+                            Toast.makeText(this, String.format("Lon: %s, Lat: %s",
+                                    location.getLongitude(), location.getLatitude()), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        } else {
+            Log.e(TAG, getString(R.string.location_permission));
+            EasyPermissions.requestPermissions(this, getString(R.string.location_permission),
+                    LOCATION_REQUEST_CODE, perms);
+        }
     }
 
     @AfterPermissionGranted(INTERNET_REQUEST_CODE)
@@ -67,6 +96,12 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
             EasyPermissions.requestPermissions(this, getString(R.string.internet_permission),
                     INTERNET_REQUEST_CODE, perms);
         }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
     }
 
     @Override
