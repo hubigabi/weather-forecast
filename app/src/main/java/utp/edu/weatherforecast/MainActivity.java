@@ -7,6 +7,8 @@ import androidx.core.app.ActivityCompat;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.nfc.Tag;
 import android.os.Bundle;
@@ -18,7 +20,9 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -35,8 +39,9 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     private static final int LOCATION_REQUEST_CODE = 2;
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    private FusedLocationProviderClient fusedLocationClient;
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
+    private FusedLocationProviderClient fusedLocationClient;
+    private Geocoder geocoder;
     private Button refreshButton;
     private Button locationButton;
 
@@ -46,6 +51,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         setContentView(R.layout.activity_main);
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        geocoder = new Geocoder(this, Locale.getDefault());
 
         refreshButton = findViewById(R.id.refresh_button);
         locationButton = findViewById(R.id.location_button);
@@ -63,8 +69,15 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
                     .addOnSuccessListener(this, location -> {
                         if (location != null) {
                             System.out.println(location);
-                            Toast.makeText(this, String.format("Lon: %s, Lat: %s",
-                                    location.getLongitude(), location.getLatitude()), Toast.LENGTH_SHORT).show();
+
+                            try {
+                                List<Address> addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+                                Toast.makeText(this, String.format("City: %s, Lat: %s, Lon: %s",
+                                        addresses.get(0).getLocality(), location.getLatitude(), location.getLongitude()),
+                                        Toast.LENGTH_SHORT).show();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
                         }
                     });
         } else {
