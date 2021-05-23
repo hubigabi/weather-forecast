@@ -18,6 +18,13 @@ import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.io.IOException;
@@ -33,7 +40,7 @@ import pub.devrel.easypermissions.AppSettingsDialog;
 import pub.devrel.easypermissions.EasyPermissions;
 import utp.edu.weatherforecast.service.WeatherClient;
 
-public class MainActivity extends AppCompatActivity implements EasyPermissions.PermissionCallbacks {
+public class MainActivity extends AppCompatActivity implements EasyPermissions.PermissionCallbacks, OnMapReadyCallback {
 
     private static final int INTERNET_REQUEST_CODE = 1;
     private static final int LOCATION_REQUEST_CODE = 2;
@@ -44,6 +51,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     private Geocoder geocoder;
     private Button refreshButton;
     private Button locationButton;
+    private GoogleMap googleMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +65,9 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         locationButton = findViewById(R.id.location_button);
         refreshButton.setOnClickListener(v -> refresh());
         locationButton.setOnClickListener(v -> location());
+
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
     }
 
     @SuppressLint("MissingPermission")
@@ -135,6 +146,30 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     public void onDestroy() {
         super.onDestroy();
         compositeDisposable.dispose();
+    }
+
+    @Override
+    public void onMapReady(@NonNull GoogleMap map) {
+        googleMap = map;
+
+//        LatLng location = new LatLng(-34, 151);
+//        googleMap.moveCamera(CameraUpdateFactory.newLatLng(location));
+
+        googleMap.setOnMapClickListener(latLng -> {
+            googleMap.clear();
+            googleMap.addMarker(new MarkerOptions()
+                    .position(latLng)
+                    .draggable(true)
+                    .title("Your new location"));
+
+            try {
+                List<Address> addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
+                Toast.makeText(this, String.format("Location: %s", addresses.get(0).getLocality()),
+                        Toast.LENGTH_SHORT).show();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
 }
