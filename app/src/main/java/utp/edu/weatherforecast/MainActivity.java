@@ -1,35 +1,29 @@
 package utp.edu.weatherforecast;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.content.pm.PackageManager;
+import android.app.Activity;
+import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
-import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.Looper;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.io.IOException;
 import java.util.List;
@@ -44,21 +38,22 @@ import pub.devrel.easypermissions.AppSettingsDialog;
 import pub.devrel.easypermissions.EasyPermissions;
 import utp.edu.weatherforecast.service.WeatherClient;
 
-public class MainActivity extends AppCompatActivity implements EasyPermissions.PermissionCallbacks, OnMapReadyCallback {
+public class MainActivity extends AppCompatActivity implements EasyPermissions.PermissionCallbacks {
 
-    private static final String TAG = MainActivity.class.getSimpleName();
-    private static final String[] perms = {Manifest.permission.INTERNET, Manifest.permission.ACCESS_FINE_LOCATION};
-    private static final int PERMISSIONS_REQUEST_CODE = 1000;
-    private static final String CURRENT_LAT_KEY = "lat";
-    private static final String CURRENT_LON_KEY = "lon";
+    private final String TAG = MainActivity.class.getSimpleName();
+    private final String[] perms = {Manifest.permission.INTERNET, Manifest.permission.ACCESS_FINE_LOCATION};
+    private final int PERMISSIONS_REQUEST_CODE = 1000;
+    public static final String CURRENT_LAT_KEY = "lat";
+    public static final String CURRENT_LON_KEY = "lon";
 
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
     private FusedLocationProviderClient fusedLocationClient;
     private LocationCallback locationCallback;
+    private ActivityResultLauncher<Intent> locationActivityResultLauncher;
     private Geocoder geocoder;
     private Button refreshButton;
-    private GoogleMap googleMap;
-    private LatLng currentLatLng;
+    private Button chooseLocationButton;
+    private LatLng currentLatLng = new LatLng(0, 0);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,10 +65,9 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         geocoder = new Geocoder(this, Locale.getDefault());
 
         refreshButton = findViewById(R.id.refresh_button);
-        refreshButton.setOnClickListener(v -> refresh());
-
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+        chooseLocationButton = findViewById(R.id.choose_location_button);
+        refreshButton.setOnClickListener(v -> refresh(currentLatLng.latitude, currentLatLng.longitude));
+        chooseLocationButton.setOnClickListener(v -> chooseLocation());
 
         locationCallback = new LocationCallback() {
             @Override
@@ -83,12 +77,32 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
                 }
                 for (Location location : locationResult.getLocations()) {
                     currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
-                    System.out.println(currentLatLng);
+                    Log.i(TAG, String.format(Locale.getDefault(), "Current location lat: %.2f, lon: %.2f",
+                            currentLatLng.latitude, currentLatLng.longitude));
                 }
             }
         };
 
-        System.out.println("Saved " + currentLatLng);
+        locationActivityResultLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        Intent intent = result.getData();
+                        String text;
+                        if (intent != null) {
+                            double lat = intent.getDoubleExtra(CURRENT_LAT_KEY, 0);
+                            double lon = intent.getDoubleExtra(CURRENT_LON_KEY, 0);
+
+                            text = String.format(Locale.getDefault(), "Chosen location" + System.lineSeparator()
+                                    + "Lat: %.2f, Lon: %.2f", lat, lon);
+                            refresh(lat, lon);
+                        } else {
+                            text = "Location has not been chosen";
+                        }
+                        Toast.makeText(this, text, Toast.LENGTH_LONG).show();
+                    }
+                });
+
         setLocation();
     }
 
@@ -113,8 +127,9 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
                             try {
                                 List<Address> addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
                                 String text = (addresses.get(0).getLocality() != null)
-                                        ? String.format("City: %s", addresses.get(0).getLocality())
-                                        : String.format("Lat: %s, Lon: %s", addresses.get(0).getLatitude(), addresses.get(0).getLongitude());
+                                        ? String.format("Current location: %s", addresses.get(0).getLocality())
+                                        : String.format(Locale.getDefault(), "Lat: %.2f, Lon: %.2f",
+                                        addresses.get(0).getLatitude(), addresses.get(0).getLongitude());
 
                                 Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
                             } catch (IOException e) {
@@ -129,11 +144,11 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     }
 
     @AfterPermissionGranted(PERMISSIONS_REQUEST_CODE)
-    private void refresh() {
+    private void refresh(double latitude, double longitude) {
         if (EasyPermissions.hasPermissions(this, perms)) {
 
             Disposable disposable = WeatherClient.getWeatherService()
-                    .getWeather(35.6577, 139.294)
+                    .getWeather(latitude, longitude)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(weatherData -> {
@@ -148,6 +163,13 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
             Log.e(TAG, getString(R.string.permission_text));
             requestPermissions();
         }
+    }
+
+    private void chooseLocation() {
+        Intent intent = new Intent(this, LocationActivity.class);
+        intent.putExtra(CURRENT_LAT_KEY, currentLatLng.latitude);
+        intent.putExtra(CURRENT_LON_KEY, currentLatLng.longitude);
+        locationActivityResultLauncher.launch(intent);
     }
 
     @Override
@@ -173,8 +195,10 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putDouble(CURRENT_LAT_KEY, currentLatLng.latitude);
-        outState.putDouble(CURRENT_LON_KEY, currentLatLng.longitude);
+        if (currentLatLng != null) {
+            outState.putDouble(CURRENT_LAT_KEY, currentLatLng.latitude);
+            outState.putDouble(CURRENT_LON_KEY, currentLatLng.longitude);
+        }
         super.onSaveInstanceState(outState);
     }
 
@@ -218,30 +242,6 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     public void onDestroy() {
         super.onDestroy();
         compositeDisposable.dispose();
-    }
-
-    @Override
-    public void onMapReady(@NonNull GoogleMap map) {
-        googleMap = map;
-
-//        LatLng location = new LatLng(-34, 151);
-//        googleMap.moveCamera(CameraUpdateFactory.newLatLng(location));
-
-        googleMap.setOnMapClickListener(latLng -> {
-            googleMap.clear();
-            googleMap.addMarker(new MarkerOptions()
-                    .position(latLng)
-                    .draggable(true)
-                    .title("Your new location"));
-
-            try {
-                List<Address> addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
-                Toast.makeText(this, String.format("Location: %s", addresses.get(0).getLocality()),
-                        Toast.LENGTH_SHORT).show();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
     }
 
 }

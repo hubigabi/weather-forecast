@@ -2,4 +2,6 @@
     <string name="app_name">Weather forecast</string>
     <string name="refresh_button_text">Refresh</string>
     <string name="permission_text">These permissions are required</string>
+    <string name="choose_location_button_text">Choose location</string>
+    <string name="location_chosen_button_text">Location has been chosen</string>
 </resources>
