@@ -12,11 +12,15 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.nfc.Tag;
 import android.os.Bundle;
+import android.os.Looper;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -42,65 +46,90 @@ import utp.edu.weatherforecast.service.WeatherClient;
 
 public class MainActivity extends AppCompatActivity implements EasyPermissions.PermissionCallbacks, OnMapReadyCallback {
 
-    private static final int INTERNET_REQUEST_CODE = 1;
-    private static final int LOCATION_REQUEST_CODE = 2;
     private static final String TAG = MainActivity.class.getSimpleName();
+    private static final String[] perms = {Manifest.permission.INTERNET, Manifest.permission.ACCESS_FINE_LOCATION};
+    private static final int PERMISSIONS_REQUEST_CODE = 1000;
+    private static final String CURRENT_LAT_KEY = "lat";
+    private static final String CURRENT_LON_KEY = "lon";
 
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
     private FusedLocationProviderClient fusedLocationClient;
+    private LocationCallback locationCallback;
     private Geocoder geocoder;
     private Button refreshButton;
-    private Button locationButton;
     private GoogleMap googleMap;
+    private LatLng currentLatLng;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        updateValuesFromBundle(savedInstanceState);
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         geocoder = new Geocoder(this, Locale.getDefault());
 
         refreshButton = findViewById(R.id.refresh_button);
-        locationButton = findViewById(R.id.location_button);
         refreshButton.setOnClickListener(v -> refresh());
-        locationButton.setOnClickListener(v -> location());
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                if (locationResult == null) {
+                    return;
+                }
+                for (Location location : locationResult.getLocations()) {
+                    currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+                    System.out.println(currentLatLng);
+                }
+            }
+        };
+
+        System.out.println("Saved " + currentLatLng);
+        setLocation();
+    }
+
+    private void requestPermissions() {
+        if (!EasyPermissions.hasPermissions(this, perms)) {
+            Log.e(TAG, getString(R.string.permission_text));
+            EasyPermissions.requestPermissions(this, getString(R.string.permission_text),
+                    PERMISSIONS_REQUEST_CODE, perms);
+        }
     }
 
     @SuppressLint("MissingPermission")
-    @AfterPermissionGranted(LOCATION_REQUEST_CODE)
-    private void location() {
-        String[] perms = {Manifest.permission.ACCESS_FINE_LOCATION};
+    @AfterPermissionGranted(PERMISSIONS_REQUEST_CODE)
+    private void setLocation() {
         if (EasyPermissions.hasPermissions(this, perms)) {
 
             fusedLocationClient.getLastLocation()
                     .addOnSuccessListener(this, location -> {
                         if (location != null) {
-                            System.out.println(location);
+                            currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
 
                             try {
                                 List<Address> addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
-                                Toast.makeText(this, String.format("City: %s, Lat: %s, Lon: %s",
-                                        addresses.get(0).getLocality(), location.getLatitude(), location.getLongitude()),
-                                        Toast.LENGTH_SHORT).show();
+                                String text = (addresses.get(0).getLocality() != null)
+                                        ? String.format("City: %s", addresses.get(0).getLocality())
+                                        : String.format("Lat: %s, Lon: %s", addresses.get(0).getLatitude(), addresses.get(0).getLongitude());
+
+                                Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
                         }
                     });
         } else {
-            Log.e(TAG, getString(R.string.location_permission));
-            EasyPermissions.requestPermissions(this, getString(R.string.location_permission),
-                    LOCATION_REQUEST_CODE, perms);
+            Log.e(TAG, getString(R.string.permission_text));
+            requestPermissions();
         }
     }
 
-    @AfterPermissionGranted(INTERNET_REQUEST_CODE)
+    @AfterPermissionGranted(PERMISSIONS_REQUEST_CODE)
     private void refresh() {
-        String[] perms = {Manifest.permission.INTERNET};
         if (EasyPermissions.hasPermissions(this, perms)) {
 
             Disposable disposable = WeatherClient.getWeatherService()
@@ -116,9 +145,8 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
             compositeDisposable.add(disposable);
 
         } else {
-            Log.e(TAG, getString(R.string.internet_permission));
-            EasyPermissions.requestPermissions(this, getString(R.string.internet_permission),
-                    INTERNET_REQUEST_CODE, perms);
+            Log.e(TAG, getString(R.string.permission_text));
+            requestPermissions();
         }
     }
 
@@ -141,6 +169,50 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     public void onPermissionsGranted(int requestCode, @NonNull List<String> perms) {
         Log.i(TAG, "Permissions granted");
         Toast.makeText(this, "Permissions granted", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putDouble(CURRENT_LAT_KEY, currentLatLng.latitude);
+        outState.putDouble(CURRENT_LON_KEY, currentLatLng.longitude);
+        super.onSaveInstanceState(outState);
+    }
+
+    private void updateValuesFromBundle(Bundle savedInstanceState) {
+        if (savedInstanceState == null) {
+            return;
+        }
+
+        if (savedInstanceState.keySet().contains(CURRENT_LAT_KEY)
+                && savedInstanceState.keySet().contains(CURRENT_LON_KEY)) {
+            currentLatLng = new LatLng(savedInstanceState.getDouble(CURRENT_LAT_KEY),
+                    savedInstanceState.getDouble(CURRENT_LON_KEY));
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        startLocationUpdates();
+    }
+
+    @SuppressLint("MissingPermission")
+    @AfterPermissionGranted(PERMISSIONS_REQUEST_CODE)
+    private void startLocationUpdates() {
+        LocationRequest locationRequest = LocationRequest.create();
+        locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+        locationRequest.setInterval(10000);
+        locationRequest.setFastestInterval(1000);
+
+        fusedLocationClient.requestLocationUpdates(locationRequest,
+                locationCallback,
+                Looper.getMainLooper());
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        fusedLocationClient.removeLocationUpdates(locationCallback);
     }
 
     public void onDestroy() {
