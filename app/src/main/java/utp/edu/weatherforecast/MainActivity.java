@@ -143,7 +143,6 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         }
     }
 
-    @AfterPermissionGranted(PERMISSIONS_REQUEST_CODE)
     private void refresh(double latitude, double longitude) {
         if (EasyPermissions.hasPermissions(this, perms)) {
 
