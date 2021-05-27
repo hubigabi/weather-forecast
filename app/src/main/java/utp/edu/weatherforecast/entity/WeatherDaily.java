@@ -3,10 +3,12 @@ package utp.edu.weatherforecast.entity;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import lombok.Builder;
 import lombok.Data;
 
 @Entity
 @Data
+@Builder
 public class WeatherDaily {
 
     @PrimaryKey(autoGenerate = true)
@@ -31,11 +33,6 @@ public class WeatherDaily {
     private Double pop;
     private Double uvi;
 
-    private Integer idWeather;
-    private String mainWeather;
-    private String descriptionWeather;
-    private String iconWeather;
-
     private Double dayTemp;
     private Double minTemp;
     private Double maxTemp;
@@ -47,5 +44,10 @@ public class WeatherDaily {
     private Double nightFeelsLike;
     private Double eveFeelsLike;
     private Double mornFeelsLike;
+
+    private Integer idWeather;
+    private String mainWeather;
+    private String descriptionWeather;
+    private String iconWeather;
 
 }
