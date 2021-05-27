@@ -36,6 +36,8 @@ import io.reactivex.schedulers.Schedulers;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.AppSettingsDialog;
 import pub.devrel.easypermissions.EasyPermissions;
+import utp.edu.weatherforecast.db.WeatherDatabase;
+import utp.edu.weatherforecast.mapper.WeatherMapper;
 import utp.edu.weatherforecast.service.WeatherClient;
 
 public class MainActivity extends AppCompatActivity implements EasyPermissions.PermissionCallbacks {
@@ -149,9 +151,20 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
             Disposable disposable = WeatherClient.getWeatherService()
                     .getWeather(latitude, longitude)
                     .subscribeOn(Schedulers.io())
+                    .map(WeatherMapper::mapToWeather)
+                    .doOnNext(weather -> {
+                        Disposable d1 = WeatherDatabase.getInstance(this).weatherHourlyDao()
+                                .insertAll(weather.getWeatherHourlyList())
+                                .subscribe(() -> Log.i(TAG, "Data from hourly weather inserted to db"));
+
+                        Disposable d2 = WeatherDatabase.getInstance(this).weatherDailyDao()
+                                .insertAll(weather.getWeatherDailyList())
+                                .subscribe(() -> Log.i(TAG, "Data from daily weather inserted to db"));
+                        compositeDisposable.addAll(d1, d2);
+                    })
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(weatherData -> {
-                        System.out.println(weatherData);
+                    .subscribe(weather -> {
+                        System.out.println(weather);
                     }, throwable -> {
                         Log.e(TAG, "Unable to get data", throwable);
                         Toast.makeText(this, "Unable to get data", Toast.LENGTH_SHORT).show();

@@ -3,12 +3,14 @@ package utp.edu.weatherforecast.entity;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
 @Entity
 @Data
 @Builder
+@AllArgsConstructor
 public class WeatherDaily {
 
     @PrimaryKey(autoGenerate = true)

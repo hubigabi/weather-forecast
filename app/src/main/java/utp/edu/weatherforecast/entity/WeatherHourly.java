@@ -16,6 +16,7 @@ import utp.edu.weatherforecast.model.WeatherData;
 @Entity
 @Data
 @Builder
+@AllArgsConstructor
 public class WeatherHourly {
 
     @PrimaryKey(autoGenerate = true)

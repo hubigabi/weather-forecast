@@ -19,4 +19,7 @@ public interface WeatherHourlyDao {
     @Insert
     Completable insert(WeatherHourly weatherHourly);
 
+    @Insert
+    Completable insertAll(List<WeatherHourly> weatherHourlyList);
+
 }

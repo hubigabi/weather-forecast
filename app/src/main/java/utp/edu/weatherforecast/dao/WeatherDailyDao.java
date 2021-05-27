@@ -19,4 +19,7 @@ public interface WeatherDailyDao {
     @Insert
     Completable insert(WeatherDaily weatherDaily);
 
+    @Insert
+    Completable insertAll(List<WeatherDaily> weatherDailyList);
+
 }
