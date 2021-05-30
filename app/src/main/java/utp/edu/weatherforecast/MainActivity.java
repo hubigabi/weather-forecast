@@ -11,12 +11,16 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.util.Log;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -24,8 +28,11 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
+import com.techhelper.segment.OnSegmentCheckedChangeListener;
+import com.techhelper.segment.Segment;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -36,11 +43,14 @@ import io.reactivex.schedulers.Schedulers;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.AppSettingsDialog;
 import pub.devrel.easypermissions.EasyPermissions;
+import utp.edu.weatherforecast.adapter.WeatherAdapter;
 import utp.edu.weatherforecast.db.WeatherDatabase;
+import utp.edu.weatherforecast.entity.Weather;
 import utp.edu.weatherforecast.mapper.WeatherMapper;
 import utp.edu.weatherforecast.service.WeatherClient;
 
-public class MainActivity extends AppCompatActivity implements EasyPermissions.PermissionCallbacks {
+public class MainActivity extends AppCompatActivity implements EasyPermissions.PermissionCallbacks,
+        OnSegmentCheckedChangeListener {
 
     private final String TAG = MainActivity.class.getSimpleName();
     private final String[] perms = {Manifest.permission.INTERNET, Manifest.permission.ACCESS_FINE_LOCATION};
@@ -55,6 +65,9 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     private Geocoder geocoder;
     private Button refreshButton;
     private Button chooseLocationButton;
+    private Segment segment;
+    private RecyclerView weatherRecyclerView;
+    private Weather weather;
     private LatLng currentLatLng = new LatLng(0, 0);
 
     @Override
@@ -68,6 +81,8 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
 
         refreshButton = findViewById(R.id.refresh_button);
         chooseLocationButton = findViewById(R.id.choose_location_button);
+        segment = (Segment) findViewById(R.id.segments);
+        weatherRecyclerView = (RecyclerView) findViewById(R.id.weather_recycler_view);
         refreshButton.setOnClickListener(v -> refresh(currentLatLng.latitude, currentLatLng.longitude));
         chooseLocationButton.setOnClickListener(v -> chooseLocation());
 
@@ -105,6 +120,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
                     }
                 });
 
+        setupSegment();
         setLocation();
     }
 
@@ -114,6 +130,12 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
             EasyPermissions.requestPermissions(this, getString(R.string.permission_text),
                     PERMISSIONS_REQUEST_CODE, perms);
         }
+    }
+
+    private void setupSegment() {
+        List<String> segmentTitles = Arrays.asList("Hourly", "Daily");
+        segment.setTitles(segmentTitles);
+        segment.setOnSegmentCheckedChangedListener(this);
     }
 
     @SuppressLint("MissingPermission")
@@ -164,7 +186,8 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
                     })
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(weather -> {
-                        System.out.println(weather);
+                        this.weather = weather;
+                        segment.setSegmentChecked(0, true);
                     }, throwable -> {
                         Log.e(TAG, "Unable to get data", throwable);
                         Toast.makeText(this, "Unable to get data", Toast.LENGTH_SHORT).show();
@@ -182,6 +205,15 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         intent.putExtra(CURRENT_LAT_KEY, currentLatLng.latitude);
         intent.putExtra(CURRENT_LON_KEY, currentLatLng.longitude);
         locationActivityResultLauncher.launch(intent);
+    }
+
+    @Override
+    public void onSegmentCheckedChanged(int position, CompoundButton buttonView, boolean isChecked) {
+        if (weather != null) {
+            weatherRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+            weatherRecyclerView.setItemAnimator(new DefaultItemAnimator());
+            weatherRecyclerView.setAdapter(new WeatherAdapter(weather, position));
+        }
     }
 
     @Override
