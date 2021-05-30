@@ -19,6 +19,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -72,6 +73,8 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     private Segment segment;
     private RecyclerView weatherRecyclerView;
 
+    private WeatherHourlyAdapter weatherHourlyAdapter;
+    private WeatherDailyAdapter weatherDailyAdapter;
     private LatLng currentLatLng = new LatLng(0, 0);
     public List<WeatherHourly> weatherHourlyList = new ArrayList<>();
     public List<WeatherDaily> weatherDailyList = new ArrayList<>();
@@ -86,11 +89,10 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         geocoder = new Geocoder(this, Locale.getDefault());
 
         refreshButton = findViewById(R.id.refresh_button);
-        chooseLocationButton = findViewById(R.id.choose_location_button);
-        segment = findViewById(R.id.segments);
-        weatherRecyclerView = findViewById(R.id.weather_recycler_view);
         refreshButton.setOnClickListener(v -> refresh(currentLatLng.latitude, currentLatLng.longitude));
+        chooseLocationButton = findViewById(R.id.choose_location_button);
         chooseLocationButton.setOnClickListener(v -> chooseLocation());
+        segment = findViewById(R.id.segments);
 
         locationCallback = new LocationCallback() {
             @Override
@@ -126,8 +128,28 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
                     }
                 });
 
+        setUpWeatherRecyclerView();
         setupSegment();
         setLocation();
+    }
+
+    private void setUpWeatherRecyclerView() {
+        weatherRecyclerView = findViewById(R.id.weather_recycler_view);
+        weatherRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        weatherRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        DividerItemDecoration itemDecoration = new DividerItemDecoration(weatherRecyclerView.getContext(),
+                DividerItemDecoration.VERTICAL);
+        weatherRecyclerView.addItemDecoration(itemDecoration);
+
+        weatherHourlyAdapter = new WeatherHourlyAdapter(weatherHourlyList);
+        weatherDailyAdapter = new WeatherDailyAdapter(weatherDailyList);
+        weatherRecyclerView.setAdapter(weatherHourlyAdapter);
+    }
+
+    private void setupSegment() {
+        List<String> segmentTitles = Arrays.asList("Hourly", "Daily");
+        segment.setTitles(segmentTitles);
+        segment.setOnSegmentCheckedChangedListener(this);
     }
 
     private void requestPermissions() {
@@ -136,12 +158,6 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
             EasyPermissions.requestPermissions(this, getString(R.string.permission_text),
                     PERMISSIONS_REQUEST_CODE, perms);
         }
-    }
-
-    private void setupSegment() {
-        List<String> segmentTitles = Arrays.asList("Hourly", "Daily");
-        segment.setTitles(segmentTitles);
-        segment.setOnSegmentCheckedChangedListener(this);
     }
 
     @SuppressLint("MissingPermission")
@@ -192,9 +208,12 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
                     })
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(weather -> {
-                        this.weatherHourlyList = weather.getWeatherHourlyList();
-                        this.weatherDailyList = weather.getWeatherDailyList();
-                        segment.setSegmentChecked(0, true);
+                        weatherHourlyList.clear();
+                        weatherDailyList.clear();
+                        weatherHourlyList.addAll(weather.getWeatherHourlyList());
+                        weatherDailyList.addAll(weather.getWeatherDailyList());
+                        weatherHourlyAdapter.notifyDataSetChanged();
+                        weatherDailyAdapter.notifyDataSetChanged();
                     }, throwable -> {
                         Log.e(TAG, "Unable to get data", throwable);
                         Toast.makeText(this, "Unable to get data", Toast.LENGTH_SHORT).show();
@@ -217,13 +236,9 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     @Override
     public void onSegmentCheckedChanged(int position, CompoundButton buttonView, boolean isChecked) {
         if (position == 0) {
-            weatherRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-            weatherRecyclerView.setItemAnimator(new DefaultItemAnimator());
-            weatherRecyclerView.setAdapter(new WeatherHourlyAdapter(weatherHourlyList));
+            weatherRecyclerView.setAdapter(weatherHourlyAdapter);
         } else {
-            weatherRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-            weatherRecyclerView.setItemAnimator(new DefaultItemAnimator());
-            weatherRecyclerView.setAdapter(new WeatherDailyAdapter(weatherDailyList));
+            weatherRecyclerView.setAdapter(weatherDailyAdapter);
         }
     }
 
