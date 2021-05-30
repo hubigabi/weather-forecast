@@ -4,50 +4,62 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_marginStart="10dp"
+    android:layout_marginEnd="10dp"
     tools:context=".MainActivity">
 
     <LinearLayout
+        android:id="@+id/buttons_linear_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        tools:ignore="MissingConstraints">
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <Button
             android:id="@+id/refresh_button"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
             android:layout_marginTop="5dp"
-            android:layout_marginRight="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_weight="1"
             android:text="@string/refresh_button_text" />
 
         <Button
             android:id="@+id/choose_location_button"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
+            android:layout_marginStart="10dp"
             android:layout_marginTop="5dp"
-            android:layout_marginRight="10dp"
+            android:layout_weight="1"
             android:text="@string/choose_location_button_text" />
 
-        <com.techhelper.segment.Segment
-            android:id="@+id/segments"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginBottom="5dp"
-            android:gravity="center_horizontal"
-            app:segmentBackgroundColor="#EFBC70"
-            app:segmentTextColor="@color/purple_500"
-            app:segmentTextSize="5sp" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/weather_recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:scrollbars="vertical" />
-
     </LinearLayout>
+
+    <com.techhelper.segment.Segment
+        android:id="@+id/segments"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="5dp"
+        android:gravity="center_horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/buttons_linear_layout"
+        app:segmentBackgroundColor="#EFBC70"
+        app:segmentTextColor="@color/purple_500"
+        app:segmentTextSize="5sp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/weather_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/segments" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
