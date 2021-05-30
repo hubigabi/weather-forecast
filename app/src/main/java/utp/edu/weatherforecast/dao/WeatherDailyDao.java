@@ -16,6 +16,9 @@ public interface WeatherDailyDao {
     @Query("SELECT * FROM weatherdaily")
     Single<List<WeatherDaily>> getAll();
 
+    @Query("SELECT * FROM weatherdaily WHERE createdDate = (SELECT MAX(createdDate) FROM weatherdaily )")
+    Single<List<WeatherDaily>> getLatest();
+
     @Insert
     Completable insert(WeatherDaily weatherDaily);
 

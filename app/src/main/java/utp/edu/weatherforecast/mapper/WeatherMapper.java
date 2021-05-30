@@ -1,6 +1,7 @@
 package utp.edu.weatherforecast.mapper;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -12,40 +13,43 @@ import utp.edu.weatherforecast.model.WeatherData;
 public class WeatherMapper {
 
     public static Weather mapToWeather(WeatherData weatherData) {
+        final Long createdDate = new Date().getTime();
         final Double lat = weatherData.getLat();
         final Double lon = weatherData.getLon();
 
         List<WeatherHourly> weatherHourlyList;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
             weatherHourlyList = weatherData.getHourly().stream()
-                    .map(hourly -> mapToWeatherHourly(hourly, lat, lon))
+                    .map(hourly -> mapToWeatherHourly(hourly, createdDate, lat, lon))
                     .collect(Collectors.toList());
         } else {
             weatherHourlyList = new ArrayList<>();
             List<WeatherData.Hourly> weatherDataHourlyList = weatherData.getHourly();
             for (WeatherData.Hourly hourly : weatherDataHourlyList) {
-                weatherHourlyList.add(mapToWeatherHourly(hourly, lat, lon));
+                weatherHourlyList.add(mapToWeatherHourly(hourly, createdDate, lat, lon));
             }
         }
 
         List<WeatherDaily> weatherDailyList;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
             weatherDailyList = weatherData.getDaily().stream()
-                    .map(daily -> mapToWeatherDaily(daily, lat, lon))
+                    .map(daily -> mapToWeatherDaily(daily, createdDate, lat, lon))
                     .collect(Collectors.toList());
         } else {
             weatherDailyList = new ArrayList<>();
             List<WeatherData.Daily> weatherDataDailyList = weatherData.getDaily();
             for (WeatherData.Daily daily : weatherDataDailyList) {
-                weatherDailyList.add(mapToWeatherDaily(daily, lat, lon));
+                weatherDailyList.add(mapToWeatherDaily(daily, createdDate, lat, lon));
             }
         }
 
         return new Weather(weatherHourlyList, weatherDailyList);
     }
 
-    private static WeatherHourly mapToWeatherHourly(WeatherData.Hourly hourly, Double lat, Double lon) {
+    private static WeatherHourly mapToWeatherHourly(WeatherData.Hourly hourly, Long createdDate,
+                                                    Double lat, Double lon) {
         WeatherHourly weatherHourly = WeatherHourly.builder()
+                .createdDate(createdDate)
                 .lon(lat)
                 .lat(lon)
                 .dt(hourly.getDt())
@@ -76,8 +80,10 @@ public class WeatherMapper {
         return weatherHourly;
     }
 
-    private static WeatherDaily mapToWeatherDaily(WeatherData.Daily daily, Double lat, Double lon) {
+    private static WeatherDaily mapToWeatherDaily(WeatherData.Daily daily, Long createdDate,
+                                                  Double lat, Double lon) {
         WeatherDaily weatherDaily = WeatherDaily.builder()
+                .createdDate(createdDate)
                 .lon(lat)
                 .lat(lon)
                 .dt(daily.getDt())

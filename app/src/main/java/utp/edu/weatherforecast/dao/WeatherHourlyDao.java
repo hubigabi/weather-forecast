@@ -8,6 +8,7 @@ import java.util.List;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;
+import utp.edu.weatherforecast.entity.WeatherDaily;
 import utp.edu.weatherforecast.entity.WeatherHourly;
 
 @Dao
@@ -15,6 +16,9 @@ public interface WeatherHourlyDao {
 
     @Query("SELECT * FROM weatherhourly")
     Single<List<WeatherHourly>> getAll();
+
+    @Query("SELECT * FROM weatherhourly WHERE createdDate = (SELECT MAX(createdDate) FROM weatherhourly )")
+    Single<List<WeatherHourly>> getLatest();
 
     @Insert
     Completable insert(WeatherHourly weatherHourly);

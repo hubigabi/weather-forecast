@@ -23,6 +23,7 @@ public class WeatherHourly {
     @PrimaryKey(autoGenerate = true)
     public int id;
 
+    private Long createdDate;
     private Double lon;
     private Double lat;
 
@@ -49,8 +50,8 @@ public class WeatherHourly {
     @Override
     public String toString() {
         @SuppressLint("SimpleDateFormat")
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM HH:mm");
-        dateFormat.setTimeZone(TimeZone.getTimeZone("Europe/Warsaw"));
+        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm dd.MM");
+        dateFormat.setTimeZone(TimeZone.getDefault());
         Date date = new Date((long) (dt * 1000L));
 
         return "Forecast time: " + dateFormat.format(date) + "\n" +

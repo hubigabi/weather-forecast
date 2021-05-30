@@ -23,6 +23,7 @@ public class WeatherDaily {
     @PrimaryKey(autoGenerate = true)
     public int id;
 
+    private Long createdDate;
     private Double lon;
     private Double lat;
 
@@ -62,7 +63,7 @@ public class WeatherDaily {
     private String convertTime(int unixTime) {
         @SuppressLint("SimpleDateFormat")
         SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
-        dateFormat.setTimeZone(TimeZone.getTimeZone("Europe/Warsaw"));
+        dateFormat.setTimeZone(TimeZone.getDefault());
         Date date = new Date(unixTime * 1000L);
         return dateFormat.format(date);
     }
@@ -71,8 +72,8 @@ public class WeatherDaily {
     @Override
     public String toString() {
         @SuppressLint("SimpleDateFormat")
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm");
-        dateFormat.setTimeZone(TimeZone.getTimeZone("Europe/Warsaw"));
+        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm dd.MM.yyyy");
+        dateFormat.setTimeZone(TimeZone.getDefault());
         Date date = new Date((long) (dt * 1000L));
 
         return "Forecast time: " + dateFormat.format(date) + "\n" +

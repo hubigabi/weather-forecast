@@ -131,6 +131,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         setUpWeatherRecyclerView();
         setupSegment();
         setLocation();
+        getLatestWeatherFromDB();
     }
 
     private void setUpWeatherRecyclerView() {
@@ -150,6 +151,30 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         List<String> segmentTitles = Arrays.asList("Hourly", "Daily");
         segment.setTitles(segmentTitles);
         segment.setOnSegmentCheckedChangedListener(this);
+    }
+
+    private void getLatestWeatherFromDB() {
+        Disposable d1 = WeatherDatabase.getInstance(this).weatherHourlyDao()
+                .getLatest()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(data -> {
+                    weatherHourlyList.clear();
+                    weatherHourlyList.addAll(data);
+                    weatherHourlyAdapter.notifyDataSetChanged();
+                }, throwable -> Log.e(TAG, "Unable to get data", throwable));
+        compositeDisposable.add(d1);
+
+        Disposable d2 = WeatherDatabase.getInstance(this).weatherDailyDao()
+                .getLatest()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(data -> {
+                    weatherDailyList.clear();
+                    weatherDailyList.addAll(data);
+                    weatherDailyAdapter.notifyDataSetChanged();
+                }, throwable -> Log.e(TAG, "Unable to get data", throwable));
+        compositeDisposable.add(d2);
     }
 
     private void requestPermissions() {
@@ -219,7 +244,6 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
                         Toast.makeText(this, "Unable to get data", Toast.LENGTH_SHORT).show();
                     });
             compositeDisposable.add(disposable);
-
         } else {
             Log.e(TAG, getString(R.string.permission_text));
             requestPermissions();
