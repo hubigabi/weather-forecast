@@ -125,6 +125,9 @@ public class WeatherData {
         @SerializedName("wind_gust")
         private Double windGust;
 
+        @SerializedName("pop")
+        private Double pop;
+
         @SerializedName("weather")
         private List<Weather> weather;
     }

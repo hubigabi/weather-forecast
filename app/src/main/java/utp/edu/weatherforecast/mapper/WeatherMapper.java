@@ -1,5 +1,6 @@
 package utp.edu.weatherforecast.mapper;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,13 +15,31 @@ public class WeatherMapper {
         final Double lat = weatherData.getLat();
         final Double lon = weatherData.getLon();
 
-        List<WeatherHourly> weatherHourlyList = weatherData.getHourly().stream()
-                .map(hourly -> mapToWeatherHourly(hourly, lat, lon))
-                .collect(Collectors.toList());
+        List<WeatherHourly> weatherHourlyList;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            weatherHourlyList = weatherData.getHourly().stream()
+                    .map(hourly -> mapToWeatherHourly(hourly, lat, lon))
+                    .collect(Collectors.toList());
+        } else {
+            weatherHourlyList = new ArrayList<>();
+            List<WeatherData.Hourly> weatherDataHourlyList = weatherData.getHourly();
+            for (WeatherData.Hourly hourly : weatherDataHourlyList) {
+                weatherHourlyList.add(mapToWeatherHourly(hourly, lat, lon));
+            }
+        }
 
-        List<WeatherDaily> weatherDailyList = weatherData.getDaily().stream()
-                .map(daily -> mapToWeatherDaily(daily, lat, lon))
-                .collect(Collectors.toList());
+        List<WeatherDaily> weatherDailyList;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            weatherDailyList = weatherData.getDaily().stream()
+                    .map(daily -> mapToWeatherDaily(daily, lat, lon))
+                    .collect(Collectors.toList());
+        } else {
+            weatherDailyList = new ArrayList<>();
+            List<WeatherData.Daily> weatherDataDailyList = weatherData.getDaily();
+            for (WeatherData.Daily daily : weatherDataDailyList) {
+                weatherDailyList.add(mapToWeatherDaily(daily, lat, lon));
+            }
+        }
 
         return new Weather(weatherHourlyList, weatherDailyList);
     }
@@ -41,6 +60,7 @@ public class WeatherMapper {
                 .windSpeed(hourly.getWindSpeed())
                 .windDeg(hourly.getWindDeg())
                 .windGust(hourly.getWindGust())
+                .pop(hourly.getPop())
                 .build();
 
         List<WeatherData.Weather> weatherList = hourly.getWeather();
