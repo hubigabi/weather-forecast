@@ -1,17 +1,18 @@
 package utp.edu.weatherforecast.entity;
 
+import android.annotation.SuppressLint;
+
+import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-import com.google.gson.annotations.SerializedName;
-
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import utp.edu.weatherforecast.model.WeatherData;
 
 @Entity
 @Data
@@ -37,10 +38,31 @@ public class WeatherHourly {
     private Double windSpeed;
     private Integer windDeg;
     private Double windGust;
+    private Double pop;
 
     private Integer idWeather;
     private String mainWeather;
     private String descriptionWeather;
     private String iconWeather;
 
+    @NonNull
+    @Override
+    public String toString() {
+        @SuppressLint("SimpleDateFormat")
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM HH:mm");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("Europe/Warsaw"));
+        Date date = new Date((long) (dt * 1000L));
+
+        return "Forecast time: " + dateFormat.format(date) + "\n" +
+                "Temperature: " + Math.round(temp) + "\u2103\n" +
+                "Perceptible temperature: " + Math.round(feelsLike) + "\u2103\n" +
+                "Pressure: " + pressure + " hPa\n" +
+                "Humidity: " + humidity + "%\n" +
+                "Cloudiness: " + clouds + "%\n" +
+                "UV index: " + uvi + "\n" +
+                "Visibility: " + visibility + " m\n" +
+                "Wind speed: " + windSpeed + " m/s\n" +
+                "Wind gust: " + windGust + " m/s\n" +
+                "Probability of precipitation: " + Math.round(pop * 100) + "%";
+    }
 }
