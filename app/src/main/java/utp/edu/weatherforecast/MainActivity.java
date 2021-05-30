@@ -32,6 +32,7 @@ import com.techhelper.segment.OnSegmentCheckedChangeListener;
 import com.techhelper.segment.Segment;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -43,9 +44,12 @@ import io.reactivex.schedulers.Schedulers;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.AppSettingsDialog;
 import pub.devrel.easypermissions.EasyPermissions;
-import utp.edu.weatherforecast.adapter.WeatherAdapter;
+import utp.edu.weatherforecast.adapter.WeatherDailyAdapter;
+import utp.edu.weatherforecast.adapter.WeatherHourlyAdapter;
 import utp.edu.weatherforecast.db.WeatherDatabase;
 import utp.edu.weatherforecast.entity.Weather;
+import utp.edu.weatherforecast.entity.WeatherDaily;
+import utp.edu.weatherforecast.entity.WeatherHourly;
 import utp.edu.weatherforecast.mapper.WeatherMapper;
 import utp.edu.weatherforecast.service.WeatherClient;
 
@@ -67,8 +71,10 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     private Button chooseLocationButton;
     private Segment segment;
     private RecyclerView weatherRecyclerView;
-    private Weather weather;
+
     private LatLng currentLatLng = new LatLng(0, 0);
+    public List<WeatherHourly> weatherHourlyList = new ArrayList<>();
+    public List<WeatherDaily> weatherDailyList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,8 +87,8 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
 
         refreshButton = findViewById(R.id.refresh_button);
         chooseLocationButton = findViewById(R.id.choose_location_button);
-        segment = (Segment) findViewById(R.id.segments);
-        weatherRecyclerView = (RecyclerView) findViewById(R.id.weather_recycler_view);
+        segment = findViewById(R.id.segments);
+        weatherRecyclerView = findViewById(R.id.weather_recycler_view);
         refreshButton.setOnClickListener(v -> refresh(currentLatLng.latitude, currentLatLng.longitude));
         chooseLocationButton.setOnClickListener(v -> chooseLocation());
 
@@ -186,7 +192,8 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
                     })
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(weather -> {
-                        this.weather = weather;
+                        this.weatherHourlyList = weather.getWeatherHourlyList();
+                        this.weatherDailyList = weather.getWeatherDailyList();
                         segment.setSegmentChecked(0, true);
                     }, throwable -> {
                         Log.e(TAG, "Unable to get data", throwable);
@@ -209,10 +216,14 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
 
     @Override
     public void onSegmentCheckedChanged(int position, CompoundButton buttonView, boolean isChecked) {
-        if (weather != null) {
+        if (position == 0) {
             weatherRecyclerView.setLayoutManager(new LinearLayoutManager(this));
             weatherRecyclerView.setItemAnimator(new DefaultItemAnimator());
-            weatherRecyclerView.setAdapter(new WeatherAdapter(weather, position));
+            weatherRecyclerView.setAdapter(new WeatherHourlyAdapter(weatherHourlyList));
+        } else {
+            weatherRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+            weatherRecyclerView.setItemAnimator(new DefaultItemAnimator());
+            weatherRecyclerView.setAdapter(new WeatherDailyAdapter(weatherDailyList));
         }
     }
 
