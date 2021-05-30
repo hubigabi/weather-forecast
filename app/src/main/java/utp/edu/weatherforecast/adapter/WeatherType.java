@@ -1,4 +1,4 @@
-package utp.edu.weatherforecast.entity;
+package utp.edu.weatherforecast.adapter;
 
 public enum WeatherType {
     HOURLY(0),
