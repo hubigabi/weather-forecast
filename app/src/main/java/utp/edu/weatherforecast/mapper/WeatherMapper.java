@@ -1,5 +1,6 @@
 package utp.edu.weatherforecast.mapper;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -59,6 +60,7 @@ public class WeatherMapper {
                 .windSpeed(hourly.getWindSpeed())
                 .windDeg(hourly.getWindDeg())
                 .windGust(hourly.getWindGust())
+                .pop(hourly.getPop())
                 .build();
 
         List<WeatherData.Weather> weatherList = hourly.getWeather();
