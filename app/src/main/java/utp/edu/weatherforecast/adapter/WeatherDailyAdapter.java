@@ -57,8 +57,8 @@ public class WeatherDailyAdapter extends RecyclerView.Adapter<WeatherDailyAdapte
         holder.humidityTextView.setText(String.format(Locale.getDefault(), "%d%%", weatherDaily.getHumidity()));
         holder.cloudinessTextView.setText(String.format(Locale.getDefault(), "%d%%", weatherDaily.getClouds()));
         holder.pressureTextView.setText(String.format(Locale.getDefault(), "%d hPa", weatherDaily.getPressure()));
-        holder.feelsLikeTextView.setText(String.format(Locale.getDefault(), "%d \u2103", weatherDaily.getDayFeelsLike().intValue()));
-        holder.nightTextView.setText(String.format(Locale.getDefault(), "%d \u2103", weatherDaily.getNightTemp().intValue()));
+        holder.feelsLikeTextView.setText(String.format(Locale.getDefault(), "%d \u2103", Math.round(weatherDaily.getDayFeelsLike())));
+        holder.nightTextView.setText(String.format(Locale.getDefault(), "%d \u2103", Math.round(weatherDaily.getNightTemp())));
     }
 
     @Override
@@ -103,12 +103,11 @@ public class WeatherDailyAdapter extends RecyclerView.Adapter<WeatherDailyAdapte
 
     private String getHeader(WeatherDaily weatherDaily) {
         StringBuilder sb = new StringBuilder();
-
         SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm dd.MM", Locale.getDefault());
         dateFormat.setTimeZone(TimeZone.getDefault());
         Date date = new Date((long) (weatherDaily.getDt() * 1000L));
         sb.append(dateFormat.format(date)).append(System.lineSeparator());
-        sb.append(weatherDaily.getDayTemp().intValue()).append(" \u2103");
+        sb.append(Math.round(weatherDaily.getDayTemp())).append(" \u2103");
         return sb.toString();
     }
 

@@ -97,10 +97,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
 
         locationCallback = new LocationCallback() {
             @Override
-            public void onLocationResult(LocationResult locationResult) {
-                if (locationResult == null) {
-                    return;
-                }
+            public void onLocationResult(@NonNull LocationResult locationResult) {
                 for (Location location : locationResult.getLocations()) {
                     currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
                     Log.i(TAG, String.format(Locale.getDefault(), "Current location lat: %.2f, lon: %.2f",
@@ -284,7 +281,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
     }
@@ -305,7 +302,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
         if (currentLatLng != null) {
             outState.putDouble(CURRENT_LAT_KEY, currentLatLng.latitude);
             outState.putDouble(CURRENT_LON_KEY, currentLatLng.longitude);

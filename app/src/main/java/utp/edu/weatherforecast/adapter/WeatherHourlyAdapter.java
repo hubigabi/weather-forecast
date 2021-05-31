@@ -56,7 +56,7 @@ public class WeatherHourlyAdapter extends RecyclerView.Adapter<WeatherHourlyAdap
         holder.humidityTextView.setText(String.format(Locale.getDefault(), "%d%%", weatherHourly.getHumidity()));
         holder.cloudinessTextView.setText(String.format(Locale.getDefault(), "%d%%", weatherHourly.getClouds()));
         holder.pressureTextView.setText(String.format(Locale.getDefault(), "%d hPa", weatherHourly.getPressure()));
-        holder.feelsLikeTextView.setText(String.format(Locale.getDefault(), "%d \u2103", weatherHourly.getFeelsLike().intValue()));
+        holder.feelsLikeTextView.setText(String.format(Locale.getDefault(), "%d \u2103", Math.round(weatherHourly.getFeelsLike())));
     }
 
     @Override
@@ -100,12 +100,11 @@ public class WeatherHourlyAdapter extends RecyclerView.Adapter<WeatherHourlyAdap
 
     private String getHeader(WeatherHourly weatherHourly) {
         StringBuilder sb = new StringBuilder();
-
         SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm dd.MM", Locale.getDefault());
         dateFormat.setTimeZone(TimeZone.getDefault());
         Date date = new Date((long) (weatherHourly.getDt() * 1000L));
         sb.append(dateFormat.format(date)).append(System.lineSeparator());
-        sb.append(weatherHourly.getTemp().intValue()).append(" \u2103");
+        sb.append(Math.round(weatherHourly.getTemp())).append(" \u2103");
         return sb.toString();
     }
 
