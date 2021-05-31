@@ -10,6 +10,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:contentDescription="@string/image_description"
+        android:paddingStart="0dp"
+        android:paddingEnd="15dp"
         android:scaleType="centerCrop" />
 
     <TextView
@@ -29,6 +31,7 @@
         <TableRow>
 
             <TextView
+                android:layout_marginEnd="20dp"
                 android:text="@string/feels_like_text"
                 android:textSize="18sp" />
 

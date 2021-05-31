@@ -61,7 +61,8 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     private final int PERMISSIONS_REQUEST_CODE = 1000;
     public static final String CURRENT_LAT_KEY = "LAT";
     public static final String CURRENT_LON_KEY = "LON";
-    public static final String WEATHER_DAILY_KEY = "ID";
+    public static final String WEATHER_DAILY_KEY = "WEATHER_DAILY";
+    public static final String WEATHER_HOURLY_KEY = "WEATHER_HOURLY";
 
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
     private FusedLocationProviderClient fusedLocationClient;
@@ -143,6 +144,14 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         weatherRecyclerView.addItemDecoration(itemDecoration);
 
         weatherHourlyAdapter = new WeatherHourlyAdapter(weatherHourlyList);
+        weatherHourlyAdapter.setClickListener((view, position) -> {
+            WeatherHourly weatherHourly = weatherHourlyAdapter.getItem(position);
+
+            Intent intent = new Intent(this, WeatherHourlyDetailsActivity.class);
+            intent.putExtra(WEATHER_HOURLY_KEY, weatherHourly);
+            startActivity(intent);
+        });
+
         weatherDailyAdapter = new WeatherDailyAdapter(weatherDailyList);
         weatherDailyAdapter.setClickListener((view, position) -> {
             WeatherDaily weatherDaily = weatherDailyAdapter.getItem(position);
