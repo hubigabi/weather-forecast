@@ -1,35 +1,104 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:layout_marginTop="5dp"
+    android:layout_marginBottom="5dp">
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <ImageView
+        android:id="@+id/weather_image_view"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        tools:ignore="MissingConstraints">
+        android:contentDescription="@string/image_description"
+        android:scaleType="centerCrop" />
 
-        <ImageView
-            android:id="@+id/weather_image_view"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_gravity="center"
-            android:contentDescription="@string/image_description"
-            android:scaleType="centerCrop" />
+    <TextView
+        android:id="@+id/header_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/weather_image_view"
+        android:textSize="22sp" />
 
-        <TextView
-            android:id="@+id/weather_text_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginBottom="5dp"
-            android:gravity="center_vertical"
-            android:scaleType="centerCrop"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textSize="18sp"
-            tools:text="Weather" />
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/header_text_view"
+        android:layout_toEndOf="@id/weather_image_view"
+        android:paddingTop="10dp">
 
-    </LinearLayout>
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <TableRow>
+
+            <TextView
+                android:text="@string/feels_like_text"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/feels_like_text_view"
+                android:gravity="end"
+                android:textSize="18sp" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:text="@string/night_text"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/night_text_view"
+                android:gravity="end"
+                android:textSize="18sp" />
+        </TableRow>
+
+        <TableRow android:textSize="18sp">
+
+            <TextView
+                android:text="@string/wind_text"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/wind_text_view"
+                android:gravity="end"
+                android:textSize="18sp" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:text="@string/pressure_text"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/pressure_text_view"
+                android:gravity="end"
+                android:textSize="18sp" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:text="@string/humidity_text"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/humidity_text_view"
+                android:gravity="end"
+                android:textSize="18sp" />
+        </TableRow>
+
+
+        <TableRow>
+
+            <TextView
+                android:text="@string/cloudiness_text"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/cloudiness_text_view"
+                android:gravity="end"
+                android:textSize="18sp" />
+        </TableRow>
+
+    </TableLayout>
+
+</RelativeLayout>

@@ -5,4 +5,10 @@
     <string name="choose_location_button_text">New location</string>
     <string name="location_chosen_button_text">Location has been chosen</string>
     <string name="image_description">weather</string>
+    <string name="wind_text">Wind</string>
+    <string name="humidity_text">Humidity</string>
+    <string name="pressure_text">Pressure</string>
+    <string name="cloudiness_text">Cloudiness</string>
+    <string name="night_text">Night</string>
+    <string name="feels_like_text">Feels like</string>
 </resources>
