@@ -8,7 +8,6 @@ import java.util.List;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;
-import utp.edu.weatherforecast.entity.WeatherDaily;
 import utp.edu.weatherforecast.entity.WeatherHourly;
 
 @Dao
