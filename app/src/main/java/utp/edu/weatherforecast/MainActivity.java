@@ -144,6 +144,11 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
 
         weatherHourlyAdapter = new WeatherHourlyAdapter(weatherHourlyList);
         weatherDailyAdapter = new WeatherDailyAdapter(weatherDailyList);
+        weatherDailyAdapter.setClickListener((view, position) -> {
+            WeatherDaily weatherDaily = weatherDailyAdapter.getItem(position);
+            System.out.println(weatherDaily);
+            Toast.makeText(this, weatherDaily.getHumidity().toString(), Toast.LENGTH_SHORT).show();
+        });
         weatherRecyclerView.setAdapter(weatherHourlyAdapter);
     }
 

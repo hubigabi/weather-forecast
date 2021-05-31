@@ -21,6 +21,7 @@ import utp.edu.weatherforecast.entity.WeatherDaily;
 public class WeatherDailyAdapter extends RecyclerView.Adapter<WeatherDailyAdapter.WeatherViewHolder> {
 
     private final List<WeatherDaily> weatherDailyList;
+    private ItemClickListener itemClickListener;
 
     public WeatherDailyAdapter(List<WeatherDaily> weatherDailyList) {
         this.weatherDailyList = weatherDailyList;
@@ -65,7 +66,7 @@ public class WeatherDailyAdapter extends RecyclerView.Adapter<WeatherDailyAdapte
         return weatherDailyList.size();
     }
 
-    public static class WeatherViewHolder extends RecyclerView.ViewHolder {
+    public class WeatherViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public ImageView weatherImageView;
         public TextView headerTextView;
         public TextView windTextView;
@@ -77,7 +78,27 @@ public class WeatherDailyAdapter extends RecyclerView.Adapter<WeatherDailyAdapte
 
         public WeatherViewHolder(@NonNull View itemView) {
             super(itemView);
+            itemView.setOnClickListener(this);
         }
+
+        @Override
+        public void onClick(View view) {
+            if (itemClickListener != null)
+                itemClickListener.onItemClick(view, getAdapterPosition());
+        }
+
+    }
+
+    public WeatherDaily getItem(int id) {
+        return weatherDailyList.get(id);
+    }
+
+    public void setClickListener(ItemClickListener itemClickListener) {
+        this.itemClickListener = itemClickListener;
+    }
+
+    public interface ItemClickListener {
+        void onItemClick(View view, int position);
     }
 
     private String getHeader(WeatherDaily weatherDaily) {
