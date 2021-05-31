@@ -13,6 +13,9 @@ import utp.edu.weatherforecast.entity.WeatherDaily;
 @Dao
 public interface WeatherDailyDao {
 
+    @Query("SELECT * FROM weatherdaily WHERE id=:id")
+    Single<WeatherDaily> getByID(Integer id);
+
     @Query("SELECT * FROM weatherdaily")
     Single<List<WeatherDaily>> getAll();
 

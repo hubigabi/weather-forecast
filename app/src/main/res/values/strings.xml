@@ -11,4 +11,5 @@
     <string name="cloudiness_text">Cloudiness</string>
     <string name="night_text">Night</string>
     <string name="feels_like_text">Feels like</string>
+    <string name="cancel_text">Cancel</string>
 </resources>

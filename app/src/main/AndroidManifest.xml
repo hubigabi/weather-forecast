@@ -13,6 +13,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.WeatherForecast">
 
+        <activity
+            android:name=".WeatherDailyDetailsActivity"
+            android:parentActivityName=".MainActivity" />
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="${MAPS_API_KEY}" />
@@ -24,11 +28,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".LocationActivity"
             android:parentActivityName=".MainActivity" />
-
     </application>
 
 </manifest>

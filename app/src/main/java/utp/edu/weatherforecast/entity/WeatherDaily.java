@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
@@ -18,7 +19,7 @@ import lombok.Data;
 @Data
 @Builder
 @AllArgsConstructor
-public class WeatherDaily {
+public class WeatherDaily implements Serializable {
 
     @PrimaryKey(autoGenerate = true)
     public int id;

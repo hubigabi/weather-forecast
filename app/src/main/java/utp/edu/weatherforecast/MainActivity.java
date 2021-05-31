@@ -48,7 +48,6 @@ import pub.devrel.easypermissions.EasyPermissions;
 import utp.edu.weatherforecast.adapter.WeatherDailyAdapter;
 import utp.edu.weatherforecast.adapter.WeatherHourlyAdapter;
 import utp.edu.weatherforecast.db.WeatherDatabase;
-import utp.edu.weatherforecast.entity.Weather;
 import utp.edu.weatherforecast.entity.WeatherDaily;
 import utp.edu.weatherforecast.entity.WeatherHourly;
 import utp.edu.weatherforecast.mapper.WeatherMapper;
@@ -60,8 +59,9 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     private final String TAG = MainActivity.class.getSimpleName();
     private final String[] perms = {Manifest.permission.INTERNET, Manifest.permission.ACCESS_FINE_LOCATION};
     private final int PERMISSIONS_REQUEST_CODE = 1000;
-    public static final String CURRENT_LAT_KEY = "lat";
-    public static final String CURRENT_LON_KEY = "lon";
+    public static final String CURRENT_LAT_KEY = "LAT";
+    public static final String CURRENT_LON_KEY = "LON";
+    public static final String WEATHER_DAILY_KEY = "ID";
 
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
     private FusedLocationProviderClient fusedLocationClient;
@@ -146,8 +146,10 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         weatherDailyAdapter = new WeatherDailyAdapter(weatherDailyList);
         weatherDailyAdapter.setClickListener((view, position) -> {
             WeatherDaily weatherDaily = weatherDailyAdapter.getItem(position);
-            System.out.println(weatherDaily);
-            Toast.makeText(this, weatherDaily.getHumidity().toString(), Toast.LENGTH_SHORT).show();
+
+            Intent intent = new Intent(this, WeatherDailyDetailsActivity.class);
+            intent.putExtra(WEATHER_DAILY_KEY, weatherDaily);
+            startActivity(intent);
         });
         weatherRecyclerView.setAdapter(weatherHourlyAdapter);
     }
@@ -156,6 +158,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         List<String> segmentTitles = Arrays.asList("Hourly", "Daily");
         segment.setTitles(segmentTitles);
         segment.setOnSegmentCheckedChangedListener(this);
+        segment.setSegmentChecked(0, true);
     }
 
     private void getLatestWeatherFromDB() {
