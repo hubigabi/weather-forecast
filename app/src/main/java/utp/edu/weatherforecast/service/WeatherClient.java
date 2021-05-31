@@ -8,13 +8,14 @@ import okhttp3.Request;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
+import utp.edu.weatherforecast.BuildConfig;
 
 public class WeatherClient {
 
     private static WeatherService weatherService;
 
     private final static String headerApiKeyName = "x-api-key";
-    private final static String apiKey = "abb65dbb6b95e97cd204a3a954ef2dcb";
+    private final static String apiKey = BuildConfig.API_KEY;;
 
     public static WeatherService getWeatherService() {
         if (weatherService == null) {

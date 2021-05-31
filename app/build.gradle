@@ -3,6 +3,10 @@ plugins {
     id 'com.google.secrets_gradle_plugin' version '0.5'
 }
 
+def keyPropertiesFile = rootProject.file("key.properties")
+def keyProperties = new Properties()
+keyProperties.load(new FileInputStream(keyPropertiesFile))
+
 android {
     compileSdkVersion 30
 
@@ -14,6 +18,7 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "API_KEY", keyProperties['API_KEY'])
     }
 
     buildTypes {
