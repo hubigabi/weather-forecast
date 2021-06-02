@@ -103,7 +103,7 @@ public class WeatherDailyAdapter extends RecyclerView.Adapter<WeatherDailyAdapte
 
     private String getHeader(WeatherDaily weatherDaily) {
         StringBuilder sb = new StringBuilder();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm dd.MM", Locale.getDefault());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("EEEE, dd.MM", Locale.getDefault());
         dateFormat.setTimeZone(TimeZone.getDefault());
         Date date = new Date((long) (weatherDaily.getDt() * 1000L));
         sb.append(dateFormat.format(date)).append(System.lineSeparator());
